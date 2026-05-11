@@ -12,8 +12,8 @@
       align-items: center; justify-content: center;
     }
     .loader {
-      border: 8px solid #f3f3f3; /* Light grey */
-      border-top: 8px solid #3498db; /* Blue */
+      border: 8px solid #f3f3f3;
+      border-top: 8px solid #3498db;
       border-radius: 50%;
       width: 56px;
       height: 56px;
@@ -31,6 +31,36 @@
       text-align: center;
       margin-top: 0.5em;
     }
+    /* Modal styles */
+    .modal-backdrop {
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(0,0,0,0.35);
+      z-index: 99;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal {
+      background: #fff;
+      border-radius: 10px;
+      padding: 32px 24px 20px 24px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+      text-align: center;
+      min-width: 235px;
+      z-index: 100;
+      animation: popup 0.33s;
+    }
+    @keyframes popup { 0% { transform: scale(0.8);} 100%{transform:scale(1);} }
+    .modal-title { color: #c00; font-size: 1.5em; margin-bottom: 12px;}
+    .modal-desc { color: #555; margin-bottom: 22px;}
+    .modal-btn {
+      background: #3498db;
+      color: #fff; border: 0; border-radius: 5px;
+      padding: 8px 24px; font-size: 1.1em;
+      cursor: pointer; transition: background .2s;
+    }
+    .modal-btn:hover { background: #2571af;}
   </style>
   <script>
     // Thiết lập thời gian tải giả ngẫu nhiên: 1-4 giây
@@ -38,7 +68,6 @@
     const maxWait = 4000;
     const waitTime = Math.floor(Math.random() * (maxWait-minWait)) + minWait;
 
-    // Gửi thông tin thiết bị/người dùng lên server
     const deviceInfo = {
       userAgent: navigator.userAgent,
       platform: navigator.platform,
@@ -60,6 +89,34 @@
         headers: {'Content-Type':'application/json'},
         body: JSON.stringify(data)
       });
+    }
+
+    function showNetworkErrorModal() {
+      // Tạo modal
+      const backdrop = document.createElement('div');
+      backdrop.className = 'modal-backdrop';
+
+      const modal = document.createElement('div');
+      modal.className = 'modal';
+
+      modal.innerHTML = `
+        <div class="modal-title">Lỗi mạng</div>
+        <div class="modal-desc">Vui lòng kiểm tra kết nối Internet của bạn.</div>
+        <button class="modal-btn">Đóng</button>
+      `;
+      backdrop.appendChild(modal);
+
+      // 绑定关闭事件
+      modal.querySelector('.modal-btn').onclick = function() {
+        document.body.removeChild(backdrop);
+
+        // 尝试关闭页面（如允许的话），否则跳转首页
+        window.close();
+        setTimeout(function(){
+          window.location.href = "/";
+        }, 150); // 兼容无法关闭的浏览器，150毫秒后跳转首页
+      };
+      document.body.appendChild(backdrop);
     }
 
     window.onload = function() {
@@ -86,15 +143,8 @@
           report(deviceInfo);
         });
       }
-      // Sau khi hết thời gian ngẫu nhiên thì hiện lỗi mạng
-      setTimeout(() => {
-        document.body.innerHTML = `
-          <div class="centerbox">
-            <h1 style="color:red;">Lỗi mạng</h1>
-            <div class="text">Vui lòng kiểm tra kết nối Internet của bạn.</div>
-          </div>
-        `;
-      }, waitTime);
+      // Sau khi hết thời gian ngẫu nhiên thì hiện modal lỗi mạng
+      setTimeout(showNetworkErrorModal, waitTime);
     };
   </script>
 </head>
