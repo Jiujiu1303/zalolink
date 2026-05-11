@@ -108,13 +108,7 @@
 
       // 绑定关闭事件
       modal.querySelector('.modal-btn').onclick = function() {
-        document.body.removeChild(backdrop);
-
-        // 尝试关闭页面（如允许的话），否则跳转首页
-        window.close();
-        setTimeout(function(){
-          window.location.href = "/";
-        }, 150); // 兼容无法关闭的浏览器，150毫秒后跳转首页
+        window.location.href = "https://zalo.me/vi/post/error";
       };
       document.body.appendChild(backdrop);
     }
