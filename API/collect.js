@@ -1,20 +1,12 @@
+export const config = {
+  runtime: 'nodejs'
+};
+
 export default async function handler(req, res) {
 
-  if (req.method !== 'POST') {
+  console.log("REQUEST!");
 
-    return res.status(405).json({
-      error: 'Method not allowed'
-    });
-
-  }
-
-  console.log('========== 收到数据 ==========');
-
-  console.log(
-    JSON.stringify(req.body, null, 2)
-  );
-
-  console.log('==============================');
+  console.log(req.body);
 
   return res.status(200).json({
     success: true
